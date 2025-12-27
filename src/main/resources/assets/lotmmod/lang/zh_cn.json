@@ -1,0 +1,103 @@
+{
+  "itemGroup.lotmmod.main": "诡秘之主",
+  "key.categories.lotmmod": "诡秘之主模组",
+
+  "key.lotmmod.skill_modifier_1": "技能修饰键 1 (Shift)",
+  "key.lotmmod.skill_modifier_2": "技能修饰键 2 (Ctrl)",
+  "key.lotmmod.skill_modifier_3": "技能修饰键 3 (Alt)",
+  "key.lotmmod.prev_preset": "上一页预设",
+  "key.lotmmod.next_preset": "下一页预设",
+  "key.lotmmod.open_skill_config": "打开能力配置",
+
+  "key.lotmmod.skill_slot_1": "技能槽位 1",
+  "key.lotmmod.skill_slot_2": "技能槽位 2",
+  "key.lotmmod.skill_slot_3": "技能槽位 3",
+  "key.lotmmod.skill_slot_4": "技能槽位 4",
+  "key.lotmmod.skill_slot_5": "技能槽位 5",
+  "key.lotmmod.skill_slot_6": "技能槽位 6",
+  "key.lotmmod.skill_slot_7": "技能槽位 7",
+  "key.lotmmod.skill_slot_8": "技能槽位 8",
+  "key.lotmmod.skill_slot_9": "技能槽位 9",
+
+  "gui.lotmmod.skill_config.title": "非凡能力配置",
+  "gui.lotmmod.skill_config.edit_hud": "调整 HUD 位置",
+  "gui.lotmmod.search_hint": "搜索技能...",
+  "gui.lotmmod.category.all": "全部",
+  "gui.lotmmod.category.active": "主动",
+  "gui.lotmmod.category.passive": "被动",
+  "gui.lotmmod.category.recorded": "记录",
+  "gui.lotmmod.toggle.on": "开启",
+  "gui.lotmmod.toggle.off": "关闭",
+  "gui.lotmmod.cooldown.minutes": "%s分",
+
+  "gui.lotmmod.skill_info.cost": "灵性: %s",
+  "gui.lotmmod.skill_info.cost.instant": "启动: %s",
+  "gui.lotmmod.skill_info.cost.upkeep": "维持: %s/s",
+  "gui.lotmmod.skill_info.conditions": "使用条件:",
+  "gui.lotmmod.skill_info.select_hint": "请选择一个技能以查看详情",
+
+  "gui.lotmmod.skill_list.sequence_group": "序列 %d",
+  "gui.lotmmod.skill_bar.copy_slot": "记录槽位",
+
+  "gui.lotmmod.skill_bar.slots": "快捷栏配置",
+  "gui.lotmmod.skill_bar.hint1": "左键拖拽技能图标",
+  "gui.lotmmod.skill_bar.hint2": "右键槽位快速清除",
+
+  "gui.lotmmod.skill_bar_edit.title": "编辑技能栏界面",
+  "gui.lotmmod.skill_bar_edit.drag_hint": "拖拽以移动界面",
+  "gui.lotmmod.skill_bar_edit.coords": "X: %d  Y: %d  [%s]",
+  "gui.lotmmod.skill_bar_edit.scale_value": "缩放: %s",
+  "gui.lotmmod.layout_label": "布局",
+  "gui.lotmmod.layout.horizontal": "横向",
+  "gui.lotmmod.layout.vertical": "纵向",
+  "gui.lotmmod.reset": "重置",
+  "gui.done": "完成",
+  "gui.cancel": "取消",
+
+  "message.lotmmod.cooldown": "技能正在冷却中！",
+  "message.lotmmod.spirituality_low": "灵性不足！",
+  "message.lotmmod.not_beyonder": "你不是非凡者！",
+  "msg.lotmmod.preset_switched": "已切换至预设页 %s",
+  "message.lotmmod.intuition_alert": "§c你感到一阵莫名的心悸... (附近威胁: %s)",
+
+  "message.lotm.skill.activated": "已开启: %s",
+  "message.lotm.skill.deactivated": "已关闭: %s",
+  "message.lotm.skill.auto_deactivated": "%s 因灵性不足自动关闭",
+  "message.lotm.spirit_vision.active": "灵视已开启",
+  "message.lotm.spirit_vision.inactive": "灵视已关闭",
+
+  "skill_type.lotmmod.instant": "瞬发",
+  "skill_type.lotmmod.toggle": "切换",
+  "skill_type.lotmmod.summon_maintain": "召唤(维持)",
+  "skill_type.lotmmod.summon_instant": "召唤(瞬发)",
+  "skill_type.lotmmod.charging": "蓄力",
+  "skill_type.lotmmod.channeling": "引导",
+  "skill_type.lotmmod.chanting": "吟唱",
+  "skill_type.lotmmod.passive": "被动",
+
+  "skill.lotmmod.spiritual_intuition": "灵性直觉",
+  "skill.lotmmod.spiritual_intuition.desc": "被动能力。赋予非凡者对危险的敏锐预感。",
+
+  "config.lotmmod.client.hud_enabled": "启用灵性 HUD",
+  "config.lotmmod.client.hud_anchor": "灵性 HUD 锚点",
+  "config.lotmmod.client.hud_offset_x": "灵性 HUD X偏移",
+  "config.lotmmod.client.hud_offset_y": "灵性 HUD Y偏移",
+  "config.lotmmod.client.skill_bar_enabled": "启用技能栏 HUD",
+  "config.lotmmod.client.skill_bar_anchor": "技能栏 HUD 锚点",
+  "config.lotmmod.client.skill_bar_offset_x": "技能栏 HUD X偏移",
+  "config.lotmmod.client.skill_bar_offset_y": "技能栏 HUD Y偏移",
+  "config.lotmmod.client.skill_bar_scale": "技能栏缩放",
+  "config.lotmmod.client.skill_bar_horizontal": "技能栏横向布局",
+
+  "config.lotmmod.common.spirituality_cost": "灵性消耗倍率",
+  "config.lotmmod.common.base_regen": "基础灵性恢复",
+
+  "pathway.lotmmod.seer": "占卜家",
+  "pathway.lotmmod.seer.seq9": "序列9: 占卜家",
+
+  "skill.lotmmod.boxing": "格斗",
+  "skill.lotmmod.boxing.desc": "基础格斗技巧。造成物理伤害并击退敌人。",
+
+  "skill.lotmmod.spirit_vision": "灵视",
+  "skill.lotmmod.spirit_vision.desc": "开启灵视，直接观察灵界与灵体。持续消耗灵性。"
+}
