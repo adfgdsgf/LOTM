@@ -4,7 +4,7 @@ import com.lotm.lotm.client.renderer.skill.ISkillRenderer;
 import com.lotm.lotm.client.util.LotMClientColors;
 import com.lotm.lotm.client.util.VisualEffectHelper;
 import com.lotm.lotm.common.capability.AbilityContainerProvider;
-import com.lotm.lotm.content.skill.seer.SpiritVision;
+import com.lotm.lotm.content.skill.base.SpiritVision;
 import com.lotm.lotm.util.PerceptionEvaluator;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;

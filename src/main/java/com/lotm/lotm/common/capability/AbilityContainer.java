@@ -74,6 +74,21 @@ public class AbilityContainer implements IAbilityContainer {
         }
     }
 
+    /**
+     * ★★★ 核心实现：彻底清空所有能力数据 ★★★
+     * 保证状态的一致性，不留死角。
+     */
+    @Override
+    public void clearAbilities() {
+        this.learnedAbilities.clear();
+        this.cachedPassiveSkills.clear();
+        this.cooldowns.clear();
+        this.activeSkills.clear();
+        this.activeTimeMap.clear();
+        this.presets.clear();
+        // activePage 可以保留，也可以重置，这里选择保留用户习惯
+    }
+
     @Override
     public boolean hasAbility(ResourceLocation abilityId) {
         return learnedAbilities.contains(abilityId);

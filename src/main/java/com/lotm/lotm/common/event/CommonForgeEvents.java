@@ -3,13 +3,16 @@ package com.lotm.lotm.common.event;
 import com.lotm.lotm.LotMMod;
 import com.lotm.lotm.common.capability.AbilityContainerProvider;
 import com.lotm.lotm.common.capability.BeyonderStateProvider;
+import com.lotm.lotm.common.capability.DivinationContainerProvider;
 import com.lotm.lotm.common.capability.skillbar.SkillBarProvider;
 import com.lotm.lotm.common.network.PacketHandler;
 import com.lotm.lotm.common.network.packet.s2c.S2CSyncAbilityDataPacket;
 import com.lotm.lotm.common.network.packet.s2c.S2CSyncBeyonderDataPacket;
+import com.lotm.lotm.common.network.packet.s2c.S2CSyncDivinationDataPacket;
 import com.lotm.lotm.common.network.packet.s2c.S2CSyncSkillBarPacket;
 import com.lotm.lotm.common.registry.LotMPathways;
 import com.lotm.lotm.common.registry.LotMSkills;
+import com.lotm.lotm.content.logic.ability.DangerSenseHandler;
 import com.lotm.lotm.content.pathway.BeyonderPathway;
 import com.lotm.lotm.content.skill.AbstractSkill;
 import net.minecraft.network.chat.Component;
@@ -49,6 +52,9 @@ public class CommonForgeEvents {
             if (!event.getObject().getCapability(SkillBarProvider.CAPABILITY).isPresent()) {
                 event.addCapability(new ResourceLocation(LotMMod.MODID, "skill_bar"), new SkillBarProvider());
             }
+            if (!event.getObject().getCapability(DivinationContainerProvider.CAPABILITY).isPresent()) {
+                event.addCapability(new ResourceLocation(LotMMod.MODID, "divination"), new DivinationContainerProvider());
+            }
         }
     }
 
@@ -62,6 +68,9 @@ public class CommonForgeEvents {
         });
         event.getOriginal().getCapability(SkillBarProvider.CAPABILITY).ifPresent(oldStore -> {
             event.getEntity().getCapability(SkillBarProvider.CAPABILITY).ifPresent(newStore -> newStore.copyFrom(oldStore));
+        });
+        event.getOriginal().getCapability(DivinationContainerProvider.CAPABILITY).ifPresent(oldStore -> {
+            event.getEntity().getCapability(DivinationContainerProvider.CAPABILITY).ifPresent(newStore -> newStore.copyFrom(oldStore));
         });
     }
 
@@ -97,6 +106,9 @@ public class CommonForgeEvents {
             });
             player.getCapability(SkillBarProvider.CAPABILITY).ifPresent(bar -> {
                 PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> serverPlayer), new S2CSyncSkillBarPacket(bar));
+            });
+            player.getCapability(DivinationContainerProvider.CAPABILITY).ifPresent(div -> {
+                PacketHandler.CHANNEL.send(PacketDistributor.PLAYER.with(() -> serverPlayer), new S2CSyncDivinationDataPacket(div));
             });
         }
     }
@@ -222,12 +234,26 @@ public class CommonForgeEvents {
             // 2. 非凡状态心跳 (灵性恢复、战斗计时)
             player.getCapability(BeyonderStateProvider.CAPABILITY).ifPresent(state -> {
                 double oldVal = state.getCurrentSpirituality();
-                state.tick(); // 执行自然恢复逻辑 (即使在创造模式也执行，方便测试恢复速度)
+                state.tick(player); // 执行自然恢复逻辑 (即使在创造模式也执行，方便测试恢复速度)
 
                 if (Math.abs(state.getCurrentSpirituality() - oldVal) > 0.01) {
                     PacketHandler.sendToPlayer(new S2CSyncBeyonderDataPacket(state), serverPlayer);
                 }
             });
+
+            // 3. 危险感知检测 (每 5 ticks / 0.25秒 执行一次)
+            if (serverPlayer.tickCount % 5 == 0) {
+                // 获取周围 64 格内的玩家作为潜在观察者
+                List<Player> nearbyPlayers = serverPlayer.level().getEntitiesOfClass(
+                        Player.class,
+                        serverPlayer.getBoundingBox().inflate(64.0)
+                );
+
+                for (Player observer : nearbyPlayers) {
+                    // 检查观察者是否正在注视当前玩家 (serverPlayer)
+                    DangerSenseHandler.checkGazeDanger(observer, serverPlayer);
+                }
+            }
         }
     }
 }

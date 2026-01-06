@@ -2,14 +2,16 @@ package com.lotm.lotm.client.gui.skillbar;
 
 import com.lotm.lotm.client.gui.util.LotMUIHelper;
 import com.lotm.lotm.client.gui.util.SkillRenderHelper;
+import com.lotm.lotm.client.gui.widget.LotMScrollbar;
 import com.lotm.lotm.client.util.LotMClientColors;
 import com.lotm.lotm.common.capability.AbilityContainerProvider;
 import com.lotm.lotm.content.skill.AbstractSkill;
+import com.lotm.lotm.util.LotMText;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,50 +19,37 @@ import java.util.List;
 /**
  * 技能列表渲染器 (层级折叠版)
  * <p>
- * 职责：渲染左侧的可滚动技能列表，支持按序列分组折叠。
- * 特性：
- * 1. 递归层级结构 (Sequence -> Skills)。
- * 2. 折叠/展开动画逻辑。
- * 3. 保持原有的拖拽、开关、高亮功能。
+ * 重构记录：
+ * 1. 引入 LotMScrollbar 托管滚动逻辑。
  */
 public class SkillListRenderer {
 
-    // ==================== 布局常量 ====================
     private static final int HEADER_HEIGHT = 20;
     private static final int ITEM_HEIGHT = 26;
     private static final int SCROLL_BAR_WIDTH = 4;
     private static final int SWITCH_WIDTH = 24;
     private static final int SWITCH_HEIGHT = 12;
 
-    // ==================== 内部数据结构 ====================
-    /**
-     * 技能分组类
-     * <p>
-     * 工业级改造：
-     * displayName 不再硬编码，而是由外部传入。
-     * 这样可以支持 "序列9: 占卜家" 这种富文本标题。
-     */
     public static class SkillGroup {
-        public final int sequence; // 序列号 (9-0)
-        public final Component displayName; // 分组显示名称
+        public final int sequence;
+        public final Component displayName;
         public final List<AbstractSkill> skills = new ArrayList<>();
-        public boolean expanded = true; // 默认展开
+        public boolean expanded = true;
 
         public SkillGroup(int sequence, Component displayName) {
             this.sequence = sequence;
             this.displayName = displayName;
         }
 
-        public Component getDisplayName() {
-            return displayName;
-        }
+        public Component getDisplayName() { return displayName; }
     }
 
-    // ==================== 状态变量 ====================
     private final Font font;
     private int x, y, width, height;
-    private double scrollOffset = 0;
     private AbstractSkill selectedSkill = null;
+
+    // ★★★ 使用通用滚动条组件 ★★★
+    private final LotMScrollbar scrollbar;
 
     public SkillListRenderer(int x, int y, int width, int height) {
         this.font = Minecraft.getInstance().font;
@@ -68,6 +57,8 @@ public class SkillListRenderer {
         this.y = y;
         this.width = width;
         this.height = height;
+        // 初始化滚动条
+        this.scrollbar = new LotMScrollbar(x + width - SCROLL_BAR_WIDTH - 2, y + 2, SCROLL_BAR_WIDTH, height - 4);
     }
 
     public void updateBounds(int x, int y, int width, int height) {
@@ -75,22 +66,18 @@ public class SkillListRenderer {
         this.y = y;
         this.width = width;
         this.height = height;
+        this.scrollbar.setBounds(x + width - SCROLL_BAR_WIDTH - 2, y + 2, SCROLL_BAR_WIDTH, height - 4);
     }
 
     public void setSelectedSkill(AbstractSkill skill) {
         this.selectedSkill = skill;
     }
 
-    /**
-     * 核心渲染方法
-     * @param groups 已分组的技能数据
-     */
     public void render(GuiGraphics graphics, int mouseX, int mouseY, List<SkillGroup> groups) {
-        // 1. 背景
         graphics.fill(x, y, x + width, y + height, LotMClientColors.CONTAINER_BG);
         graphics.renderOutline(x, y, width, height, LotMClientColors.CONTAINER_BORDER);
 
-        // 2. 计算总高度
+        // 计算总高度
         int totalHeight = 0;
         for (SkillGroup group : groups) {
             totalHeight += HEADER_HEIGHT + 1;
@@ -98,26 +85,21 @@ public class SkillListRenderer {
                 totalHeight += group.skills.size() * (ITEM_HEIGHT + 1);
             }
         }
-        totalHeight += 2; // padding
+        totalHeight += 2;
 
-        // 3. 滚动计算
-        int maxScroll = Math.max(0, totalHeight - height);
-        this.scrollOffset = Mth.clamp(this.scrollOffset, 0, maxScroll);
+        // 更新滚动条内容
+        this.scrollbar.setContentHeight(totalHeight);
 
-        // 4. 开启裁剪
         graphics.enableScissor(x + 1, y + 1, x + width - 1, y + height - 1);
 
-        int currentY = (int) (y + 2 - scrollOffset);
+        int currentY = (int) (y + 2 - scrollbar.getScrollOffset());
 
-        // 5. 遍历渲染
         for (SkillGroup group : groups) {
-            // 渲染分组标题
             if (currentY + HEADER_HEIGHT > y && currentY < y + height) {
                 renderGroupHeader(graphics, group, x + 2, currentY, width - 4 - SCROLL_BAR_WIDTH, mouseX, mouseY);
             }
             currentY += HEADER_HEIGHT + 1;
 
-            // 如果展开，渲染子项
             if (group.expanded) {
                 for (AbstractSkill skill : group.skills) {
                     if (currentY + ITEM_HEIGHT > y && currentY < y + height) {
@@ -130,10 +112,8 @@ public class SkillListRenderer {
 
         graphics.disableScissor();
 
-        // 6. 滚动条
-        if (maxScroll > 0) {
-            renderScrollBar(graphics, mouseX, mouseY, totalHeight, maxScroll);
-        }
+        // 渲染滚动条
+        this.scrollbar.render(graphics, mouseX, mouseY);
     }
 
     private void renderGroupHeader(GuiGraphics graphics, SkillGroup group, int hX, int hY, int hW, int mouseX, int mouseY) {
@@ -141,12 +121,8 @@ public class SkillListRenderer {
         int bgColor = isHovered ? LotMClientColors.GROUP_HEADER_BG_HOVER : LotMClientColors.GROUP_HEADER_BG;
 
         graphics.fill(hX, hY, hX + hW, hY + HEADER_HEIGHT, bgColor);
-
-        // 箭头
         String arrow = group.expanded ? "▼" : "▶";
         graphics.drawString(font, arrow, hX + 4, hY + 6, LotMClientColors.GROUP_ARROW, false);
-
-        // 标题
         graphics.drawString(font, group.getDisplayName(), hX + 16, hY + 6, LotMClientColors.TEXT_TITLE, true);
     }
 
@@ -155,7 +131,6 @@ public class SkillListRenderer {
                 mouseY >= entryY && mouseY < entryY + ITEM_HEIGHT;
         boolean isSelected = (skill == this.selectedSkill);
 
-        // 背景
         int bgColor;
         if (isSelected) bgColor = LotMClientColors.LIST_ITEM_BG_SELECTED;
         else if (isHovered) bgColor = LotMClientColors.LIST_ITEM_BG_HOVER;
@@ -163,28 +138,23 @@ public class SkillListRenderer {
 
         graphics.fill(entryX, entryY, entryX + entryWidth, entryY + ITEM_HEIGHT, bgColor);
 
-        // 边框
         if (isSelected || isHovered) {
             int borderColor = isSelected ? LotMClientColors.LIST_ITEM_BORDER_SELECTED : LotMClientColors.LIST_ITEM_BORDER_NORMAL;
             graphics.renderOutline(entryX, entryY, entryWidth, ITEM_HEIGHT, borderColor);
         }
 
-        // 图标
         int iconSize = ITEM_HEIGHT - 4;
         SkillRenderHelper.renderSkillIcon(graphics, skill, entryX + 2, entryY + 2, iconSize);
 
-        // 文本
         int textX = entryX + iconSize + 6;
         int textMaxWidth = entryWidth - (iconSize + 6) - 4;
 
-        // 开关
         boolean hasToggle = skill.getCastType().isToggleOrMaintain();
         if (hasToggle) {
             textMaxWidth -= (SWITCH_WIDTH + 6);
             renderToggleButton(graphics, skill, entryX, entryY, entryWidth, mouseX, mouseY);
         }
 
-        // 名称
         Component name = skill.getDisplayName();
         int textY = entryY + (ITEM_HEIGHT - 8) / 2;
         int textColor = isSelected ? LotMClientColors.TEXT_HIGHLIGHT : LotMClientColors.TEXT_NORMAL;
@@ -201,37 +171,45 @@ public class SkillListRenderer {
             isActive = cap.orElse(null).isSkillActive(skill.getId());
         }
 
-        boolean isBtnHovered = mouseX >= btnX && mouseX < btnX + SWITCH_WIDTH &&
-                mouseY >= btnY && mouseY < btnY + SWITCH_HEIGHT;
+        Player player = Minecraft.getInstance().player;
+        boolean canToggle = player.isCreative() || skill.canBeDeactivated(player);
 
-        LotMUIHelper.renderToggleSwitch(graphics, btnX, btnY, SWITCH_WIDTH, SWITCH_HEIGHT, isActive, isBtnHovered);
-    }
+        if (!canToggle && isActive) {
+            graphics.fill(btnX, btnY, btnX + SWITCH_WIDTH, btnY + SWITCH_HEIGHT, 0xFF555555);
+            graphics.renderOutline(btnX, btnY, SWITCH_WIDTH, SWITCH_HEIGHT, 0xFF333333);
 
-    private void renderScrollBar(GuiGraphics graphics, int mouseX, int mouseY, int contentHeight, int maxScroll) {
-        int barHeight = Math.max(20, (int) ((float) height / contentHeight * height));
-        int barY = y + (int) ((float) scrollOffset / maxScroll * (height - barHeight));
-        int barX = x + width - SCROLL_BAR_WIDTH - 2;
+            Component lockText = LotMText.GUI_LOCKED;
+            float scale = 0.5f;
+            int textWidth = font.width(lockText);
+            float textX = btnX + (SWITCH_WIDTH - textWidth * scale) / 2.0f;
+            float textY = btnY + (SWITCH_HEIGHT - 8 * scale) / 2.0f + 1.0f;
 
-        graphics.fill(barX, y + 2, barX + SCROLL_BAR_WIDTH, y + height - 2, LotMClientColors.SCROLL_TRACK);
-        boolean isHovered = mouseX >= barX && mouseX <= barX + SCROLL_BAR_WIDTH;
-        int thumbColor = isHovered ? LotMClientColors.SCROLL_THUMB_HOVER : LotMClientColors.SCROLL_THUMB_NORMAL;
-        graphics.fill(barX, barY, barX + SCROLL_BAR_WIDTH, barY + barHeight, thumbColor);
+            graphics.pose().pushPose();
+            graphics.pose().translate(textX, textY, 0);
+            graphics.pose().scale(scale, scale, 1f);
+            graphics.drawString(font, lockText, 0, 0, 0xFFAAAAAA, false);
+            graphics.pose().popPose();
+        } else {
+            boolean isBtnHovered = mouseX >= btnX && mouseX < btnX + SWITCH_WIDTH &&
+                    mouseY >= btnY && mouseY < btnY + SWITCH_HEIGHT;
+            LotMUIHelper.renderToggleSwitch(graphics, btnX, btnY, SWITCH_WIDTH, SWITCH_HEIGHT, isActive, isBtnHovered);
+        }
     }
 
     // ==================== 交互逻辑 ====================
 
-    /**
-     * 处理点击事件
-     * @return true 如果事件被处理
-     */
     public boolean mouseClicked(double mouseX, double mouseY, int button, List<SkillGroup> groups) {
         if (mouseX < x || mouseX > x + width || mouseY < y || mouseY > y + height) return false;
 
-        double relativeY = mouseY - y - 2 + scrollOffset;
+        // ★★★ 优先处理滚动条 ★★★
+        if (this.scrollbar.mouseClicked(mouseX, mouseY, button)) {
+            return true;
+        }
+
+        double relativeY = mouseY - y - 2 + scrollbar.getScrollOffset();
         int currentY = 0;
 
         for (SkillGroup group : groups) {
-            // 检查标题点击 (折叠/展开)
             if (relativeY >= currentY && relativeY < currentY + HEADER_HEIGHT) {
                 group.expanded = !group.expanded;
                 return true;
@@ -240,9 +218,8 @@ public class SkillListRenderer {
 
             if (group.expanded) {
                 for (AbstractSkill skill : group.skills) {
-                    // 检查条目点击
                     if (relativeY >= currentY && relativeY < currentY + ITEM_HEIGHT) {
-                        return false; // 交给 Screen 处理具体逻辑 (选中/拖拽/开关)
+                        return false;
                     }
                     currentY += ITEM_HEIGHT + 1;
                 }
@@ -251,13 +228,20 @@ public class SkillListRenderer {
         return false;
     }
 
-    /**
-     * 获取鼠标位置下的技能 (用于 Screen 的选中/拖拽逻辑)
-     */
+    // ★★★ 转发释放事件 ★★★
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+        return this.scrollbar.mouseReleased(mouseX, mouseY, button);
+    }
+
+    // ★★★ 转发拖拽事件 ★★★
+    public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
+        return this.scrollbar.mouseDragged(mouseX, mouseY, button, dragX, dragY);
+    }
+
     public AbstractSkill getSkillAt(double mouseX, double mouseY, List<SkillGroup> groups) {
         if (mouseX < x || mouseX > x + width || mouseY < y || mouseY > y + height) return null;
 
-        double relativeY = mouseY - y - 2 + scrollOffset;
+        double relativeY = mouseY - y - 2 + scrollbar.getScrollOffset();
         int currentY = 0;
 
         for (SkillGroup group : groups) {
@@ -274,20 +258,24 @@ public class SkillListRenderer {
         return null;
     }
 
-    /**
-     * 获取开关按钮区域检测
-     */
     public boolean isOverToggleButton(double mouseX, double mouseY, AbstractSkill skill, List<SkillGroup> groups) {
         if (!skill.getCastType().isToggleOrMaintain()) return false;
 
-        // 重新计算位置 (性能略低但逻辑安全)
-        int currentY = (int) (y + 2 - scrollOffset);
+        Player player = Minecraft.getInstance().player;
+        boolean isActive = false;
+        var cap = player.getCapability(AbilityContainerProvider.CAPABILITY);
+        if (cap.isPresent()) isActive = cap.orElse(null).isSkillActive(skill.getId());
+
+        if (isActive && !player.isCreative() && !skill.canBeDeactivated(player)) {
+            return false;
+        }
+
+        int currentY = (int) (y + 2 - scrollbar.getScrollOffset());
         for (SkillGroup group : groups) {
             currentY += HEADER_HEIGHT + 1;
             if (group.expanded) {
                 for (AbstractSkill s : group.skills) {
                     if (s == skill) {
-                        // 找到了目标技能的 Y 坐标
                         int entryWidth = width - 12 - SCROLL_BAR_WIDTH;
                         int entryX = x + 8;
                         int btnX = entryX + entryWidth - SWITCH_WIDTH - 4;
@@ -304,8 +292,7 @@ public class SkillListRenderer {
 
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         if (mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height) {
-            this.scrollOffset -= delta * 20;
-            return true;
+            return this.scrollbar.mouseScrolled(mouseX, mouseY, delta);
         }
         return false;
     }

@@ -2,10 +2,10 @@ package com.lotm.lotm.client.gui.overlay;
 
 import com.lotm.lotm.api.capability.IAbilityContainer;
 import com.lotm.lotm.client.config.LotMClientConfig;
-import com.lotm.lotm.client.util.LotMClientColors;
 import com.lotm.lotm.client.gui.util.SkillRenderHelper;
 import com.lotm.lotm.client.key.LotMKeyBindings;
 import com.lotm.lotm.client.renderer.HudPositionHelper;
+import com.lotm.lotm.client.util.LotMClientColors;
 import com.lotm.lotm.common.capability.AbilityContainerProvider;
 import com.lotm.lotm.common.capability.skillbar.ISkillBarContainer;
 import com.lotm.lotm.common.capability.skillbar.SkillBarProvider;
@@ -22,9 +22,6 @@ import net.minecraftforge.client.gui.overlay.IGuiOverlay;
 
 /**
  * 技能栏 HUD 渲染层
- * <p>
- * 负责在游戏主界面绘制快捷技能栏。
- * 支持缩放和横竖布局切换。
  */
 public class SkillBarOverlay implements IGuiOverlay {
 
@@ -46,19 +43,14 @@ public class SkillBarOverlay implements IGuiOverlay {
         });
     }
 
-    /**
-     * 渲染整个技能栏
-     */
     private void renderSkillBar(GuiGraphics graphics, Player player, ISkillBarContainer bar,
                                 IAbilityContainer abilities, int screenWidth, int screenHeight) {
-        // 1. 获取配置
         boolean horizontal = LotMClientConfig.CLIENT.skillBarHorizontal.get();
         float scale = LotMClientConfig.CLIENT.skillBarScale.get().floatValue();
         var anchor = LotMClientConfig.CLIENT.skillBarAnchor.get();
         int offsetX = LotMClientConfig.CLIENT.skillBarOffsetX.get();
         int offsetY = LotMClientConfig.CLIENT.skillBarOffsetY.get();
 
-        // 2. 计算基础尺寸 (未缩放)
         int slotCount = ISkillBarContainer.SLOT_COUNT;
         int baseWidth = horizontal ?
                 slotCount * SLOT_SIZE + (slotCount - 1) * SLOT_SPACING :
@@ -67,11 +59,9 @@ public class SkillBarOverlay implements IGuiOverlay {
                 SLOT_SIZE :
                 slotCount * SLOT_SIZE + (slotCount - 1) * SLOT_SPACING;
 
-        // 3. 计算缩放后的实际占用尺寸 (用于定位)
         int scaledWidth = (int) (baseWidth * scale);
         int scaledHeight = (int) (baseHeight * scale);
 
-        // 4. 计算屏幕绝对坐标
         int[] pos = HudPositionHelper.calculatePosition(
                 anchor, offsetX, offsetY,
                 screenWidth, screenHeight,
@@ -80,7 +70,6 @@ public class SkillBarOverlay implements IGuiOverlay {
         int startX = pos[0];
         int startY = pos[1];
 
-        // 5. 开始渲染
         graphics.pose().pushPose();
         graphics.pose().translate(startX, startY, 0);
         graphics.pose().scale(scale, scale, 1.0f);
@@ -94,9 +83,6 @@ public class SkillBarOverlay implements IGuiOverlay {
         graphics.pose().popPose();
     }
 
-    /**
-     * 渲染单个技能槽
-     */
     private void renderSingleSlot(GuiGraphics graphics, Player player, ISkillBarContainer bar,
                                   IAbilityContainer abilities, int slotIndex, int x, int y) {
         // A. 背景框
@@ -108,15 +94,27 @@ public class SkillBarOverlay implements IGuiOverlay {
         if (skillId != null) {
             AbstractSkill skill = LotMSkills.getSkill(skillId);
             if (skill != null) {
-                SkillRenderHelper.renderSkillIcon(graphics, skill, x + 1, y + 1, SLOT_SIZE - 2);
+                // 获取冷却状态
+                boolean onCooldown = abilities.isOnCooldown(skillId);
 
-                if (abilities.isOnCooldown(skillId)) {
+                // ★★★ 核心修改：传递 isCooldown 参数，实现变暗效果 ★★★
+                SkillRenderHelper.renderSkillIcon(graphics, skill, x + 1, y + 1, SLOT_SIZE - 2, onCooldown);
+
+                // 激活状态显示
+                if (abilities.isSkillActive(skillId)) {
+                    SkillRenderHelper.renderActiveState(graphics, x, y, SLOT_SIZE, SLOT_SIZE);
+                }
+
+                // 冷却处理
+                if (onCooldown) {
                     int currentCd = abilities.getCooldown(skillId);
                     int maxCd = skill.getCooldown(player);
 
                     if (maxCd > 0) {
                         float factor = (float) currentCd / maxCd;
+                        // 渲染扇形时钟遮罩
                         SkillRenderHelper.renderCooldownOverlay(graphics, x + 1, y + 1, SLOT_SIZE - 2, factor);
+                        // 渲染倒计时文字
                         renderCooldownText(graphics, currentCd, x, y);
                     }
                 }
@@ -127,19 +125,13 @@ public class SkillBarOverlay implements IGuiOverlay {
         renderKeyBindHint(graphics, slotIndex, x, y);
     }
 
-    /**
-     * 渲染冷却时间文本
-     */
     private void renderCooldownText(GuiGraphics graphics, int ticks, int x, int y) {
         Component text;
         Font font = Minecraft.getInstance().font;
 
         if (ticks >= 1200) {
-            // 大于1分钟，显示分钟数
-            // 使用本地化键 "gui.lotmmod.cooldown.minutes" -> "%sm"
             text = Component.translatable("gui.lotmmod.cooldown.minutes", ticks / 1200);
         } else {
-            // 小于1分钟，显示秒数
             text = Component.literal(String.valueOf(ticks / 20 + 1));
         }
 
@@ -153,9 +145,6 @@ public class SkillBarOverlay implements IGuiOverlay {
         graphics.pose().popPose();
     }
 
-    /**
-     * 渲染按键绑定提示
-     */
     private void renderKeyBindHint(GuiGraphics graphics, int slotIndex, int x, int y) {
         if (slotIndex >= LotMKeyBindings.SKILL_SLOT_KEYS.size()) return;
 

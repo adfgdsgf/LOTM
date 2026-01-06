@@ -1,8 +1,9 @@
 package com.lotm.lotm.client.gui.skillbar;
 
-import com.lotm.lotm.client.util.LotMClientColors;
 import com.lotm.lotm.client.gui.util.SkillRenderHelper;
 import com.lotm.lotm.client.key.LotMKeyBindings;
+import com.lotm.lotm.client.util.LotMClientColors;
+import com.lotm.lotm.common.capability.AbilityContainerProvider;
 import com.lotm.lotm.common.capability.skillbar.ISkillBarContainer;
 import com.lotm.lotm.common.capability.skillbar.SkillBarProvider;
 import com.lotm.lotm.common.registry.LotMSkills;
@@ -16,9 +17,6 @@ import net.minecraft.world.entity.player.Player;
 
 /**
  * 技能槽位网格渲染器
- * <p>
- * 职责：绘制 3x3 的技能配置网格。
- * 修正：移除了错误的“复制槽位”，保持网格纯净。
  */
 public class SlotGridRenderer {
 
@@ -44,19 +42,13 @@ public class SlotGridRenderer {
     public int getX() { return x; }
     public int getY() { return y; }
 
-    /**
-     * 渲染整个网格
-     */
     public void render(GuiGraphics graphics, int mouseX, int mouseY) {
-        // 绘制标题
         graphics.drawString(font, Component.translatable("gui.lotmmod.skill_bar.slots"), x, y - 15, LotMClientColors.TEXT_TITLE, true);
 
-        // 绘制 3x3 槽位
         for (int i = 0; i < ISkillBarContainer.SLOT_COUNT; i++) {
             renderSlot(graphics, i, mouseX, mouseY);
         }
 
-        // 绘制底部提示
         renderHints(graphics);
     }
 
@@ -94,7 +86,19 @@ public class SlotGridRenderer {
                     AbstractSkill skill = LotMSkills.getSkill(skillId);
                     if (skill != null) {
                         int padding = 2;
-                        SkillRenderHelper.renderSkillIcon(graphics, skill, slotX + padding, slotY + padding, slotSize - padding * 2);
+
+                        // ★★★ 核心修改：检查冷却状态并变暗 ★★★
+                        boolean isCooldown = false;
+                        var cap = player.getCapability(AbilityContainerProvider.CAPABILITY);
+                        if (cap.isPresent()) {
+                            isCooldown = cap.orElse(null).isOnCooldown(skillId);
+                        }
+
+                        SkillRenderHelper.renderSkillIcon(graphics, skill, slotX + padding, slotY + padding, slotSize - padding * 2, isCooldown);
+
+                        if (cap.isPresent() && cap.orElse(null).isSkillActive(skillId)) {
+                            SkillRenderHelper.renderActiveState(graphics, slotX, slotY, slotSize, slotSize);
+                        }
                     }
                 }
             });

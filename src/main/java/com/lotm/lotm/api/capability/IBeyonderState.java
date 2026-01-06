@@ -2,6 +2,7 @@ package com.lotm.lotm.api.capability;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.common.capabilities.AutoRegisterCapability;
 
 @AutoRegisterCapability
@@ -39,7 +40,16 @@ public interface IBeyonderState {
     boolean isInCombat();
 
     // --- 心跳逻辑 ---
-    void tick();
+    /**
+     * 执行每 Tick 逻辑
+     * <p>
+     * 修改说明：
+     * 增加 Player 参数，以便在心跳逻辑中访问玩家的 Attribute 系统，
+     * 从而动态更新灵性侦测和隐蔽属性。
+     *
+     * @param player 宿主玩家实体
+     */
+    void tick(Player player);
 
     // --- 数据同步 ---
     void copyFrom(IBeyonderState other);

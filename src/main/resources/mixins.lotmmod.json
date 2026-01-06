@@ -8,7 +8,8 @@
   ],
   "client": [
     "client.LivingEntityRendererAccessor",
-    "client.MixinLivingEntityRenderer"
+    "client.MixinLivingEntityRenderer",
+    "client.MixinEntityClient"
   ],
   "server": [
 

@@ -2,6 +2,8 @@
   "itemGroup.lotmmod.main": "Lord of the Mysteries",
   "key.categories.lotmmod": "Lord of the Mysteries Mod",
 
+  "item.lotmmod.spirit_pendulum": "Spirit Pendulum",
+
   "key.lotmmod.skill_modifier_1": "Skill Modifier 1 (Shift)",
   "key.lotmmod.skill_modifier_2": "Skill Modifier 2 (Ctrl)",
   "key.lotmmod.skill_modifier_3": "Skill Modifier 3 (Alt)",
@@ -19,6 +21,15 @@
   "key.lotmmod.skill_slot_8": "Skill Slot 8",
   "key.lotmmod.skill_slot_9": "Skill Slot 9",
 
+  "gui.lotmmod.divination.title": "Spirit Pendulum - Target Selection",
+  "gui.lotmmod.divination.start": "Start Divination",
+  "gui.lotmmod.divination.tab.blocks": "Blocks",
+  "gui.lotmmod.divination.tab.entities": "Entities",
+  "gui.lotmmod.divination.select_category": "Select Divination Category",
+  "gui.lotmmod.divination.tab.misc": "Misc",
+  "gui.lotmmod.divination.target.water": "Water Source",
+  "gui.lotmmod.divination.target.danger": "Danger Source",
+
   "gui.lotmmod.skill_config.title": "Skill Configuration",
   "gui.lotmmod.skill_config.edit_hud": "Edit HUD Position",
   "gui.lotmmod.search_hint": "Search Skills...",
@@ -29,8 +40,17 @@
   "gui.lotmmod.toggle.on": "ON",
   "gui.lotmmod.toggle.off": "OFF",
   "gui.lotmmod.cooldown.minutes": "%sm",
+  "gui.lotmmod.locked": "-",
+
   "gui.lotmmod.skill_info.cost": "Spirit: %s",
+  "gui.lotmmod.skill_info.cost.instant": "Cast: %s",
+  "gui.lotmmod.skill_info.cost.upkeep": "Upkeep: %s/s",
+  "gui.lotmmod.skill_info.conditions": "Conditions:",
   "gui.lotmmod.skill_info.select_hint": "Please select a skill to view details",
+  "gui.lotmmod.skill.condition.medium": "Requires Medium",
+  "gui.lotmmod.skill.condition.consume_on_use": "Consumes Spirituality on Use",
+  "gui.lotmmod.divination.mastery": "Divination Mastery",
+
   "gui.lotmmod.skill_list.sequence_group": "Sequence %d",
   "gui.lotmmod.skill_bar.copy_slot": "Recorded",
 
@@ -53,11 +73,23 @@
   "message.lotmmod.spirituality_low": "Not enough Spirituality!",
   "message.lotmmod.not_beyonder": "You are not a Beyonder!",
   "msg.lotmmod.preset_switched": "Switched to Preset %s",
+  "message.lotmmod.intuition_alert": "§cYou feel a sudden palpitation... ",
 
   "message.lotm.skill.activated": "Activated: %s",
   "message.lotm.skill.deactivated": "Deactivated: %s",
   "message.lotm.skill.auto_deactivated": "%s deactivated due to low spirituality",
   "message.lotm.spirit_vision.active": "Spirit Vision Active",
+  "message.lotm.spirit_vision.inactive": "Spirit Vision Inactive",
+
+  "message.lotm.divination.target_set": "Divination target set. Hold right-click to start.",
+  "message.lotm.divination.fail.no_skill": "You don't know how to use this. (Requires: Divination)",
+  "message.lotm.divination.fail.no_target": "No target in mind. (Sneak + Right Click to set target)",
+  "message.lotm.divination.fail.no_spirit": "Spirituality depleted. Divination interrupted.",
+  "message.lotm.divination.fail.interrupted": "Divination was interrupted.",
+  "message.lotm.divination.not_found": "The pendulum is silent. (Target not found or obscured)",
+  "message.lotm.divination.fail.generic": "Divination failed. The result is unclear.",
+  "message.lotm.divination.backfire": "You feel a strong backlash!",
+  "message.lotm.divination.result_prefix": "Pendulum points to:",
 
   "skill_type.lotmmod.instant": "Instant",
   "skill_type.lotmmod.toggle": "Toggle",
@@ -66,6 +98,13 @@
   "skill_type.lotmmod.charging": "Charging",
   "skill_type.lotmmod.channeling": "Channeling",
   "skill_type.lotmmod.chanting": "Chanting",
+  "skill_type.lotmmod.passive": "Passive",
+
+  "skill.lotmmod.divination": "Divination",
+  "skill.lotmmod.divination.desc": "Basic occult ability. Allows the usage of pendulums and coins for divination.",
+
+  "skill.lotmmod.spiritual_intuition": "Spiritual Intuition",
+  "skill.lotmmod.spiritual_intuition.desc": "Passive ability. Grants the Beyonder a keen sense of danger.",
 
   "config.lotmmod.client.hud_enabled": "Enable Spirituality HUD",
   "config.lotmmod.client.hud_anchor": "Spirituality HUD Anchor",
@@ -83,6 +122,33 @@
 
   "pathway.lotmmod.seer": "Seer",
   "pathway.lotmmod.seer.seq9": "Seq 9: Seer",
+
   "skill.lotmmod.boxing": "Boxing",
-  "skill.lotmmod.spirit_vision": "Spirit Vision"
+  "skill.lotmmod.boxing.desc": "Basic combat technique. Deals physical damage and knocks back enemies.",
+
+  "skill.lotmmod.spirit_vision": "Spirit Vision",
+  "skill.lotmmod.spirit_vision.desc": "Activates Spirit Vision to observe the spirit world and spiritual bodies. Consumes spirituality continuously.",
+
+  "pathway.lotmmod.monster": "Monster",
+  "pathway.lotmmod.monster.seq9": "Monster",
+  "message.lotm.intuition.trance": "The flood of information leaves you in a trance...",
+  "message.lotm.whisper.threat.monster": "Your intuition screams... Danger approaches from %s.",
+  "message.lotm.whisper.threat.beyonder": "A sting in your spirit! A high-ranking existence watches from %s...",
+
+  "message.lotm.whisper.treasure.ore": "You hear the pulse of the earth from %s...",
+  "message.lotm.whisper.treasure.chest": "Greedy whispers echo from %s, hinting at hidden wealth...",
+  "message.lotm.whisper.lore.1": "The taste of a Demoness isn't bad...",
+  "message.lotm.whisper.lore.2": "Beware the Spectator... even if it's a dog...",
+  "message.lotm.whisper.lore.3": "The Cosmos... only madness and corruption...",
+  "message.lotm.whisper.lore.4": "That cat at Earl Hall's seems strange lately...",
+  "message.lotm.whisper.lore.5": "Another smoggy day in Backlund...",
+  "message.lotmmod.dir.front": "Front",
+  "message.lotmmod.dir.back": "Back",
+  "message.lotmmod.dir.left": "Left",
+  "message.lotmmod.dir.right": "Right",
+  "message.lotmmod.dir.above": "Above",
+  "message.lotmmod.dir.below": "Below",
+
+  "message.lotmmod.danger_sense.gaze": "[危险感知] 你感觉到 %s 正在注视你!",
+  "message.lotmmod.danger_sense.chat": "[危险感知] 你感觉到 %s 在谈论你!"
 }

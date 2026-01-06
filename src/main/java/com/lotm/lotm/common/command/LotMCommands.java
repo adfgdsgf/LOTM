@@ -89,7 +89,6 @@ public class LotMCommands {
         // 1. 验证途径是否存在 (拒绝假设，严谨检查)
         BeyonderPathway pathway = LotMPathways.get(targetPathwayId);
         if (pathway == null) {
-            // 使用 Component.literal 反馈错误，或者使用翻译键
             context.getSource().sendFailure(Component.literal("§cError: Pathway not found: " + targetPathwayId));
             return 0;
         }
@@ -100,36 +99,36 @@ public class LotMCommands {
             state.setPathwayId(targetPathwayId);
             state.setSequence(targetSeq);
 
-            // 重新计算并补满灵性 (依赖 BeyonderState 内部的自动计算逻辑)
+            // 重新计算并补满灵性
             double maxSpirit = state.getMaxSpirituality();
             state.setCurrentSpirituality(maxSpirit);
         });
 
-        // 3. 学习对应序列的所有技能 (AbilityContainer)
+        // 3. 重置并学习技能 (AbilityContainer)
         player.getCapability(AbilityContainerProvider.CAPABILITY).ifPresent(abilities -> {
-            // 动态获取该序列及以下的所有技能
-            List<ResourceLocation> skillsToLearn = pathway.getAvailableSkills(targetSeq);
+            // ★★★ 核心调用：原子化重置 ★★★
+            // 切换途径意味着“洗点”，必须彻底清空旧数据。
+            // 这一步逻辑现在由 AbilityContainer 内部封装，保证了高内聚。
+            abilities.clearAbilities();
 
-            // 使用 AtomicInteger 解决 Lambda 变量作用域问题
+            // 4. 学习新技能
+            List<ResourceLocation> skillsToLearn = pathway.getAvailableSkills(targetSeq);
             AtomicInteger learnCount = new AtomicInteger(0);
 
             for (ResourceLocation skillId : skillsToLearn) {
-                // 防止重复学习
                 if (!abilities.hasAbility(skillId)) {
                     abilities.learnAbility(skillId);
                     learnCount.incrementAndGet();
                 }
             }
 
-            // 发送详细反馈消息
             context.getSource().sendSuccess(() -> Component.literal(
-                    String.format("§a[LotM] Learned %d skills from %s.", learnCount.get(), targetPathwayId)), true);
+                    String.format("§a[LotM] Reset abilities. Learned %d skills from %s.", learnCount.get(), targetPathwayId)), true);
         });
 
-        // 4. 立即同步所有数据到客户端 (确保 UI 实时更新)
+        // 5. 立即同步所有数据到客户端
         CommonCapabilityEvents.syncAllData(player);
 
-        // 发送最终成功消息
         context.getSource().sendSuccess(() -> Component.literal(
                 String.format("§a[LotM] Successfully initialized as %s (Seq %d).", targetPathwayId.getPath(), targetSeq)), true);
 

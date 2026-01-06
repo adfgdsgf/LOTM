@@ -43,4 +43,15 @@ public class LotMText {
     public static final MutableComponent MSG_NOT_BEYONDER = translatable(PREFIX_MSG + "not_beyonder");
     public static final MutableComponent MSG_SPIRITUALITY_LOW = translatable(PREFIX_MSG + "spirituality_low");
     public static final MutableComponent MSG_COOLDOWN = translatable(PREFIX_MSG + "cooldown");
+
+    // ★★★ 新增：GUI 文本 ★★★
+    public static final MutableComponent GUI_LOCKED = translatable(PREFIX_GUI + "locked");
+
+    // ★★★ 新增：方向与呓语 ★★★
+    public static final MutableComponent DIR_FRONT = translatable(PREFIX_MSG + "dir.front");
+    public static final MutableComponent DIR_BACK = translatable(PREFIX_MSG + "dir.back");
+    public static final MutableComponent DIR_LEFT = translatable(PREFIX_MSG + "dir.left");
+    public static final MutableComponent DIR_RIGHT = translatable(PREFIX_MSG + "dir.right");
+    public static final MutableComponent DIR_ABOVE = translatable(PREFIX_MSG + "dir.above");
+    public static final MutableComponent DIR_BELOW = translatable(PREFIX_MSG + "dir.below");
 }

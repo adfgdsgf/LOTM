@@ -80,6 +80,36 @@ public abstract class BeyonderPathway {
     }
 
     /**
+     * ★★★ 新增：计算某序列的总侦测能力 ★★★
+     * 算法：基础值(0) + 序列9到当前序列的所有加成之和
+     */
+    public double getTotalDetection(int currentSeq) {
+        double total = 0.0;
+        for (int i = 9; i >= currentSeq; i--) {
+            PathwaySequence data = sequences.get(i);
+            if (data != null) {
+                total += data.detectionBonus();
+            }
+        }
+        return total;
+    }
+
+    /**
+     * ★★★ 新增：计算某序列的总隐蔽能力 ★★★
+     * 算法：基础值(0) + 序列9到当前序列的所有加成之和
+     */
+    public double getTotalConcealment(int currentSeq) {
+        double total = 0.0;
+        for (int i = 9; i >= currentSeq; i--) {
+            PathwaySequence data = sequences.get(i);
+            if (data != null) {
+                total += data.concealmentBonus();
+            }
+        }
+        return total;
+    }
+
+    /**
      * 获取某序列所有可用的技能 (包括低序列的)
      */
     public List<ResourceLocation> getAvailableSkills(int currentSeq) {
@@ -99,22 +129,41 @@ public abstract class BeyonderPathway {
         private final Map<Integer, PathwaySequence> sequences = new HashMap<>();
 
         /**
-         * 添加序列配置 (旧版兼容重载，默认无生命/攻击加成)
+         * 添加序列配置 (基础版，无额外属性)
          */
         public Builder add(int level, double spiritBonus, ResourceLocation... skills) {
-            return add(level, spiritBonus, 0.0, 0.0, skills);
+            return add(level, spiritBonus, 0.0, 0.0, 0.0, 0.0, skills);
         }
 
         /**
-         * 添加序列配置 (全参数)
-         * @param level 序列等级
-         * @param spiritBonus 灵性上限加成
-         * @param healthBonus 生命上限加成 (预留)
-         * @param damageBonus 攻击力加成 (预留)
-         * @param skills 解锁技能
+         * 添加序列配置 (旧版全参数，默认无侦测/隐蔽)
          */
         public Builder add(int level, double spiritBonus, double healthBonus, double damageBonus, ResourceLocation... skills) {
-            sequences.put(level, new PathwaySequence(level, spiritBonus, healthBonus, damageBonus, List.of(skills)));
+            return add(level, spiritBonus, healthBonus, damageBonus, 0.0, 0.0, skills);
+        }
+
+        /**
+         * ★★★ 添加序列配置 (完整版，包含感知属性) ★★★
+         * @param level 序列等级
+         * @param spiritBonus 灵性上限加成
+         * @param healthBonus 生命上限加成
+         * @param damageBonus 攻击力加成
+         * @param detectionBonus 灵性侦测加成 (新增)
+         * @param concealmentBonus 灵性隐蔽加成 (新增)
+         * @param skills 解锁技能
+         */
+        public Builder add(int level, double spiritBonus, double healthBonus, double damageBonus,
+                           double detectionBonus, double concealmentBonus,
+                           ResourceLocation... skills) {
+            sequences.put(level, new PathwaySequence(
+                    level,
+                    spiritBonus,
+                    healthBonus,
+                    damageBonus,
+                    detectionBonus,
+                    concealmentBonus,
+                    List.of(skills)
+            ));
             return this;
         }
 

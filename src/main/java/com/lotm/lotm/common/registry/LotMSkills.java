@@ -4,7 +4,8 @@ import com.lotm.lotm.LotMMod;
 import com.lotm.lotm.content.skill.AbstractSkill;
 import com.lotm.lotm.content.skill.base.Boxing;
 import com.lotm.lotm.content.skill.base.SpiritualIntuition;
-import com.lotm.lotm.content.skill.seer.SpiritVision;
+import com.lotm.lotm.content.skill.seer.Divination;
+import com.lotm.lotm.content.skill.base.SpiritVision;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.HashMap;
@@ -37,6 +38,7 @@ public class LotMSkills {
     public static final Boxing BOXING = new Boxing();
     // 新增：灵性直觉
     public static final SpiritualIntuition SPIRITUAL_INTUITION = new SpiritualIntuition();
+    public static final Divination DIVINATION = new Divination();
 
     // ==================================================
     //               占卜家途径 (Seer)
@@ -63,6 +65,7 @@ public class LotMSkills {
         // 2. 注册占卜家技能
         registerSkill(SPIRIT_VISION);
         registerSkill(SPIRITUAL_INTUITION);
+        registerSkill(DIVINATION);
 
         // 注册更多...
 

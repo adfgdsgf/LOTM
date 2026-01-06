@@ -141,6 +141,11 @@ public final class LotMClientColors {
     /** 技能槽背景 (悬停) */
     public static final int SKILL_SLOT_BG_HOVER = 0xFF555555;
 
+    /** 技能激活状态遮罩 (半透明绿) - 用于 Toggle 技能开启时的持续高亮 */
+    public static final int SKILL_ACTIVE_OVERLAY = 0x4055FF55;
+    /** 技能激活状态边框 (亮绿) - 用于 Toggle 技能开启时的持续高亮 */
+    public static final int SKILL_ACTIVE_BORDER = 0xFF55FF55;
+
     /** 复制/记录槽位背景 (神秘紫) */
     public static final int COPY_SLOT_BG = 0xFF332244;
     /** 复制/记录槽位边框 (亮紫) */
@@ -170,6 +175,12 @@ public final class LotMClientColors {
 
     /** 灵视 HUD 晕影 (ARGB: Alpha=30, R=0, G=255, B=200) */
     public static final int SPIRIT_VISION_VIGNETTE = 0x1E00FFC8;
+
+    // ========================================================================
+    // 占卜特效 (Divination)
+    // ========================================================================
+    /** 占卜目标高亮 (金色) */
+    public static final int DIVINATION_HIGHLIGHT = 0xFFFFD700;
 
     // ========================================================================
     // 图标回退 (Icon Fallback)

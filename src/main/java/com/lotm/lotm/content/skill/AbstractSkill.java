@@ -18,7 +18,10 @@ import java.util.List;
  * 职责：
  * 1. 定义所有技能的通用行为契约 (消耗、冷却、释放)。
  * 2. 提供 UI 显示所需的元数据接口 (维持消耗、使用条件)。
- * 3. **统一管理切换型技能 (Toggle) 的通用逻辑** (如消息反馈)，避免子类重复代码。
+ * 3. 统一管理切换型技能 (Toggle) 的通用逻辑。
+ * <p>
+ * 新增特性：
+ * - {@link #canBeDeactivated(Player)}: 控制技能是否可以被主动关闭。
  */
 public abstract class AbstractSkill {
     private final ResourceLocation id;
@@ -48,6 +51,8 @@ public abstract class AbstractSkill {
 
     /**
      * 获取冷却时间 (Ticks)
+     * <p>
+     * 对于 Toggle 技能，这代表**关闭后的冷却时间**。
      */
     public abstract int getCooldown(Player player);
 
@@ -79,6 +84,29 @@ public abstract class AbstractSkill {
      */
     public List<Component> getUsageConditions(Player player, int sequence) {
         return Collections.emptyList();
+    }
+
+    // ==================================================
+    //                 配置钩子 (Hooks)
+    // ==================================================
+
+    /**
+     * 是否在操作时显示 Action Bar 反馈消息
+     * 默认为 true。
+     */
+    protected boolean shouldShowFeedback() {
+        return true;
+    }
+
+    /**
+     * 检查技能是否允许被主动关闭
+     * <p>
+     * 用于实现“怪物途径灵感不可控”等机制。
+     * 如果返回 false，UI 上的开关将锁定，且 C2S 包会拒绝关闭请求。
+     * 默认返回 true。
+     */
+    public boolean canBeDeactivated(Player player) {
+        return true;
     }
 
     // ==================================================
@@ -142,19 +170,31 @@ public abstract class AbstractSkill {
         if (player.isCreative()) return true;
 
         if (!state.isBeyonder()) return false;
+
         if (abilities.isOnCooldown(id)) {
-            if (!player.level().isClientSide) player.sendSystemMessage(LotMText.MSG_COOLDOWN);
+            if (!player.level().isClientSide && shouldShowFeedback()) {
+                // ★★★ 优化：冷却提示发送到 Action Bar ★★★
+                player.displayClientMessage(LotMText.MSG_COOLDOWN, true);
+            }
             return false;
         }
 
-        // 对于 Toggle 技能，如果是关闭操作，不需要检查灵性
+        // 检查是否正在尝试关闭技能
         boolean isDeactivating = castType.isToggleOrMaintain() && abilities.isSkillActive(id);
-        if (!isDeactivating && state.getCurrentSpirituality() < getCost(player, state.getSequence())) {
-            if (!player.level().isClientSide) player.sendSystemMessage(LotMText.MSG_SPIRITUALITY_LOW);
+
+        // ★★★ 核心检查：如果试图关闭一个不可关闭的技能 ★★★
+        if (isDeactivating && !canBeDeactivated(player)) {
             return false;
         }
 
-        // TODO: 检查 getUsageConditions 中的硬性条件 (如物品消耗)
+        // 如果不是关闭操作（即开启操作），则检查灵性是否足够
+        if (!isDeactivating && state.getCurrentSpirituality() < getCost(player, state.getSequence())) {
+            if (!player.level().isClientSide && shouldShowFeedback()) {
+                // ★★★ 优化：灵性不足提示发送到 Action Bar ★★★
+                player.displayClientMessage(LotMText.MSG_SPIRITUALITY_LOW, true);
+            }
+            return false;
+        }
 
         return true;
     }
@@ -166,35 +206,65 @@ public abstract class AbstractSkill {
         // 被动技能无法通过 cast 调用
         if (castType == SkillCastType.PASSIVE) return;
 
-        // ★★★ 统一处理切换型技能的消息反馈 ★★★
+        // ============================================================
+        // 分支 A: 切换型技能 (Toggle / Maintain)
+        // ============================================================
         if (castType.isToggleOrMaintain()) {
             if (abilities.isSkillActive(id)) {
-                // --- 关闭逻辑 ---
+                // ----------------------------------------------------
+                // 动作：关闭技能 (Deactivate)
+                // ----------------------------------------------------
+
+                // 双重检查，防止绕过 canCast 直接调用
+                if (!player.isCreative() && !canBeDeactivated(player)) {
+                    return;
+                }
+
                 abilities.deactivateSkill(id);
                 this.onDeactivate(player); // 调用子类清理逻辑 (仅音效/特效)
 
-                // 统一发送关闭消息: "已关闭: [技能名]"
-                // 避免每个子类都写一遍，且保证格式统一
-                player.sendSystemMessage(Component.translatable("message.lotm.skill.deactivated", getDisplayName()));
-                return;
+                // ★★★ 核心逻辑：关闭时才应用完整的冷却时间 ★★★
+                if (!player.isCreative()) {
+                    abilities.setCooldown(id, getCooldown(player));
+                }
+
+                // 提示反馈
+                if (shouldShowFeedback()) {
+                    player.displayClientMessage(Component.translatable("message.lotm.skill.deactivated", getDisplayName()), true);
+                }
+                return; // 结束，不执行 performEffect
             } else {
-                // --- 开启逻辑 ---
+                // ----------------------------------------------------
+                // 动作：开启技能 (Activate)
+                // ----------------------------------------------------
                 abilities.activateSkill(id);
 
-                // 统一发送开启消息: "已开启: [技能名]"
-                player.sendSystemMessage(Component.translatable("message.lotm.skill.activated", getDisplayName()));
+                // ★★★ 核心逻辑：开启时只给一个极短的冷却 (0.5秒)，防止手滑连点 ★★★
+                if (!player.isCreative()) {
+                    abilities.setCooldown(id, 10); // 10 ticks = 0.5s
+                    // 扣除启动消耗
+                    state.consumeSpirituality(getCost(player, state.getSequence()));
+                }
 
-                // 继续向下执行 performEffect (通常用于播放开启音效或给予初始状态)
+                // 提示反馈
+                if (shouldShowFeedback()) {
+                    player.displayClientMessage(Component.translatable("message.lotm.skill.activated", getDisplayName()), true);
+                }
+
+                // 继续向下执行 performEffect (通常用于播放开启音效)
             }
         }
 
-        // 执行具体效果
+        // ============================================================
+        // 通用逻辑：执行具体效果
+        // ============================================================
         performEffect(player, level, context);
 
-        // ★★★ 创造模式逻辑：不扣费，不进冷却 (无限连发) ★★★
-        if (!player.isCreative()) {
-            // 只有非 Toggle 类，或者 Toggle 类的开启阶段才扣费
-            // Toggle 类的持续扣费在 onActiveTick 中处理
+        // ============================================================
+        // 分支 B: 瞬发型技能 (Instant / Charging / etc)
+        // ============================================================
+        // 只有非 Toggle 类才在这里扣费和计算冷却
+        if (!castType.isToggleOrMaintain() && !player.isCreative()) {
             state.consumeSpirituality(getCost(player, state.getSequence()));
             abilities.setCooldown(id, getCooldown(player));
         }

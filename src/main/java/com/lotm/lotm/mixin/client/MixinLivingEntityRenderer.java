@@ -24,22 +24,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
-/**
- * 实体渲染 Mixin (轻量化版)
- * <p>
- * 工业级规范：
- * Mixin 仅作为钩子 (Hook)，负责拦截和转发。
- * 具体的数学计算、逻辑判断全部委托给 {@link VisualEffectHelper}。
- * <p>
- * 职责：
- * 1. 拦截 getRenderType -> 切换 X-Ray 模式。
- * 2. 重定向 renderToBuffer -> 应用动态颜色。
- * 3. 重定向 layers 访问 -> 过滤杂物层。
- */
 @Mixin(LivingEntityRenderer.class)
 public abstract class MixinLivingEntityRenderer<T extends LivingEntity, M extends EntityModel<T>> extends EntityRenderer<T> {
 
-    // Shadow 父类中的 protected 字段，以便直接访问
     @Shadow protected List<RenderLayer<T, M>> layers;
 
     protected MixinLivingEntityRenderer(EntityRendererProvider.Context pContext) {
@@ -57,14 +44,15 @@ public abstract class MixinLivingEntityRenderer<T extends LivingEntity, M extend
     /**
      * 1. 拦截 getRenderType
      * <p>
-     * 目的：判断是否开启 X-Ray，如果开启则替换为透视 RenderType。
+     * 目的：判断是否开启 X-Ray (灵视 或 占卜高亮)，如果开启则替换为透视 RenderType。
      */
     @Inject(method = "getRenderType", at = @At("HEAD"), cancellable = true)
     private void injectGetRenderType(T entity, boolean pBodyVisible, boolean pTranslucent, boolean pGlowing, CallbackInfoReturnable<RenderType> cir) {
-        // 逻辑委托：判断是否应用 X-Ray
+        // ★★★ 核心调用：询问 Helper 是否需要透视 ★★★
+        // Helper 内部会检查 ClientDivinationRenderer.isDivinationTarget()
         if (VisualEffectHelper.shouldApplyXRay(entity)) {
             ResourceLocation texture = this.getTextureLocation(entity);
-            // 使用自定义的 X-Ray RenderType
+            // 使用自定义的 X-Ray RenderType (GL_ALWAYS 深度测试)
             cir.setReturnValue(LotMRenderTypes.getSpiritXRay(texture));
             lotm$isXRayActive = true;
         } else {
@@ -75,7 +63,7 @@ public abstract class MixinLivingEntityRenderer<T extends LivingEntity, M extend
     /**
      * 2. 重定向 renderToBuffer (主体染色逻辑)
      * <p>
-     * 目的：在 X-Ray 模式下，覆盖原始的纹理颜色，使用灵体颜色。
+     * 目的：在 X-Ray 模式下，覆盖原始的纹理颜色，使用灵体颜色 (或占卜金色)。
      */
     @Redirect(
             method = "render(Lnet/minecraft/world/entity/LivingEntity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V",
@@ -91,7 +79,8 @@ public abstract class MixinLivingEntityRenderer<T extends LivingEntity, M extend
             T entity
     ) {
         if (lotm$isXRayActive) {
-            // 逻辑委托：获取计算好的动态颜色 (含距离增强)
+            // ★★★ 核心调用：获取动态颜色 ★★★
+            // 如果是占卜目标，Helper 会返回金色；如果是灵视，返回情绪颜色
             Vector4f color = VisualEffectHelper.getDynamicXRayColor(entity);
             model.renderToBuffer(poseStack, buffer, packedLight, packedOverlay, color.x, color.y, color.z, color.w);
         } else {

@@ -3,7 +3,7 @@ package com.lotm.lotm.util;
 import com.lotm.lotm.common.capability.AbilityContainerProvider;
 import com.lotm.lotm.common.capability.BeyonderStateProvider;
 import com.lotm.lotm.common.registry.LotMAttributes;
-import com.lotm.lotm.content.skill.seer.SpiritVision;
+import com.lotm.lotm.content.skill.base.SpiritVision;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 

@@ -1,6 +1,5 @@
 package com.lotm.lotm.common.network.packet.s2c;
 
-import com.lotm.lotm.LotMMod;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -38,18 +37,21 @@ public record S2CIntuitionAlertPacket(int dangerLevel) {
             Player player = Minecraft.getInstance().player;
             if (player == null) return;
 
-            // 1. 听觉反馈：心跳声
-            // 使用音符盒的底鼓声 (Base Drum) 模拟心跳 "咚...咚..."
-            // 音调随危险等级升高 (0.6 ~ 1.0)，模拟心跳加速
-            float pitch = 0.6f + (msg.dangerLevel * 0.05f);
+            // 1. 听觉反馈：危险等级决定音调 (0.6 ~ 1.2)
+            // 越危险，心跳越急促/尖锐
+            float pitch = 0.6f + (msg.dangerLevel * 0.15f);
+
             player.level().playSound(player, player.getX(), player.getY(), player.getZ(),
-                    SoundEvents.NOTE_BLOCK_BASEDRUM.get(), // 修复点：使用更稳定的音效常量
+                    SoundEvents.NOTE_BLOCK_BASEDRUM.get(),
                     SoundSource.PLAYERS,
                     1.0f, pitch);
 
             // 2. 视觉反馈：Action Bar 提示
+            // ★★★ 修正：不再格式化数字，只显示纯文本 ★★★
+            // 文本会自动在约 3 秒后淡出，配合服务端 10 秒的 CD，会有 7 秒的清净时间。
             player.displayClientMessage(
-                    Component.translatable("message.lotmmod.intuition_alert", msg.dangerLevel),
+                    Component.translatable("message.lotmmod.intuition_alert")
+                            .withStyle(style -> style.withColor(0xFF5555)), // 保持红色警示
                     true
             );
         }

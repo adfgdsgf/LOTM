@@ -2,6 +2,8 @@
   "itemGroup.lotmmod.main": "诡秘之主",
   "key.categories.lotmmod": "诡秘之主模组",
 
+  "item.lotmmod.spirit_pendulum": "灵摆",
+
   "key.lotmmod.skill_modifier_1": "技能修饰键 1 (Shift)",
   "key.lotmmod.skill_modifier_2": "技能修饰键 2 (Ctrl)",
   "key.lotmmod.skill_modifier_3": "技能修饰键 3 (Alt)",
@@ -19,6 +21,16 @@
   "key.lotmmod.skill_slot_8": "技能槽位 8",
   "key.lotmmod.skill_slot_9": "技能槽位 9",
 
+  "gui.lotmmod.divination.title": "灵摆占卜 - 目标选择",
+  "gui.lotmmod.divination.start": "开始占卜",
+  "gui.lotmmod.divination.tab.blocks": "方块",
+  "gui.lotmmod.divination.tab.entities": "生物",
+  "gui.lotmmod.divination.select_category": "选择占卜类型",
+  "gui.lotmmod.divination.tab.misc": "杂项",
+  "gui.lotmmod.divination.target.water": "寻找水源",
+  "gui.lotmmod.divination.target.danger": "感知危险",
+
+
   "gui.lotmmod.skill_config.title": "非凡能力配置",
   "gui.lotmmod.skill_config.edit_hud": "调整 HUD 位置",
   "gui.lotmmod.search_hint": "搜索技能...",
@@ -29,12 +41,16 @@
   "gui.lotmmod.toggle.on": "开启",
   "gui.lotmmod.toggle.off": "关闭",
   "gui.lotmmod.cooldown.minutes": "%s分",
+  "gui.lotmmod.locked": "-",
 
   "gui.lotmmod.skill_info.cost": "灵性: %s",
   "gui.lotmmod.skill_info.cost.instant": "启动: %s",
   "gui.lotmmod.skill_info.cost.upkeep": "维持: %s/s",
   "gui.lotmmod.skill_info.conditions": "使用条件:",
   "gui.lotmmod.skill_info.select_hint": "请选择一个技能以查看详情",
+  "gui.lotmmod.skill.condition.medium": "需要占卜物品",
+  "gui.lotmmod.skill.condition.consume_on_use": "使用时消耗灵性",
+  "gui.lotmmod.divination.mastery": "占卜熟练度",
 
   "gui.lotmmod.skill_list.sequence_group": "序列 %d",
   "gui.lotmmod.skill_bar.copy_slot": "记录槽位",
@@ -58,13 +74,28 @@
   "message.lotmmod.spirituality_low": "灵性不足！",
   "message.lotmmod.not_beyonder": "你不是非凡者！",
   "msg.lotmmod.preset_switched": "已切换至预设页 %s",
-  "message.lotmmod.intuition_alert": "§c你感到一阵莫名的心悸... (附近威胁: %s)",
+  "message.lotmmod.intuition_alert": "§c你感到一阵莫名的心悸... ",
 
   "message.lotm.skill.activated": "已开启: %s",
   "message.lotm.skill.deactivated": "已关闭: %s",
   "message.lotm.skill.auto_deactivated": "%s 因灵性不足自动关闭",
   "message.lotm.spirit_vision.active": "灵视已开启",
   "message.lotm.spirit_vision.inactive": "灵视已关闭",
+
+  "message.lotm.divination.target_set": "占卜目标已设定，长按右键开始占卜。",
+  "message.lotm.divination.start_continuous": "持续占卜已开启，灵摆将持续指引目标。",
+  "message.lotm.divination.stop": "占卜已结束。",
+  "message.lotm.divination.stop_unequipped": "未手持灵摆，占卜中断。",
+  "message.lotm.divination.cancel": "占卜中断。",
+  "message.lotm.divination.fail.no_skill": "你不知道如何使用这个物品 (需要技能: 占卜)。",
+  "message.lotm.divination.fail.no_target": "心中没有目标 (请潜行右键设定目标)。",
+  "message.lotm.divination.fail.no_spirit": "灵性枯竭，占卜中断。",
+  "message.lotm.divination.fail.no_spirit_continuous": "灵性耗尽，占卜被迫中止。",
+  "message.lotm.divination.fail.interrupted": "占卜被打断了。",
+  "message.lotm.divination.not_found": "灵摆没有反应 (目标不存在或被干扰)。",
+  "message.lotm.divination.fail.generic": "占卜失败，结果模糊不清。",
+  "message.lotm.divination.backfire": "你感受到了强烈的反噬！",
+  "message.lotm.divination.result_prefix": "灵摆指向:",
 
   "skill_type.lotmmod.instant": "瞬发",
   "skill_type.lotmmod.toggle": "切换",
@@ -74,6 +105,9 @@
   "skill_type.lotmmod.channeling": "引导",
   "skill_type.lotmmod.chanting": "吟唱",
   "skill_type.lotmmod.passive": "被动",
+
+  "skill.lotmmod.divination": "占卜",
+  "skill.lotmmod.divination.desc": "基础神秘学能力。允许非凡者使用灵摆、硬币等媒介进行占卜。",
 
   "skill.lotmmod.spiritual_intuition": "灵性直觉",
   "skill.lotmmod.spiritual_intuition.desc": "被动能力。赋予非凡者对危险的敏锐预感。",
@@ -99,5 +133,28 @@
   "skill.lotmmod.boxing.desc": "基础格斗技巧。造成物理伤害并击退敌人。",
 
   "skill.lotmmod.spirit_vision": "灵视",
-  "skill.lotmmod.spirit_vision.desc": "开启灵视，直接观察灵界与灵体。持续消耗灵性。"
+  "skill.lotmmod.spirit_vision.desc": "开启灵视，直接观察灵界与灵体。持续消耗灵性。",
+
+  "pathway.lotmmod.monster": "怪物",
+  "pathway.lotmmod.monster.seq9": "怪物",
+  "message.lotm.intuition.trance": "周围的信息洪流让你感到一阵恍惚...",
+  "message.lotm.whisper.threat.monster": "你的灵性直觉在尖叫... %s方有危险正在逼近。",
+  "message.lotm.whisper.threat.beyonder": "你的灵性感到一阵刺痛！%s方有一位高位格的存在注视着这里...",
+
+  "message.lotm.whisper.treasure.ore": "你听见%s方的岩层中传来了大地的脉动...",
+  "message.lotm.whisper.treasure.chest": "贪婪的低语在%s方回荡，那里似乎藏着某种财富...",
+  "message.lotm.whisper.lore.1": "魔女的滋味真不错...",
+  "message.lotm.whisper.lore.2": "小心观众... 哪怕是一条狗...",
+  "message.lotm.whisper.lore.3": "星空... 只有疯狂与污染...",
+  "message.lotm.whisper.lore.4": "霍尔伯爵家的那只猫最近有些奇怪...",
+  "message.lotm.whisper.lore.5": "今天的贝克兰德又是雾霾天...",
+  "message.lotmmod.dir.front": "前",
+  "message.lotmmod.dir.back": "后",
+  "message.lotmmod.dir.left": "左",
+  "message.lotmmod.dir.right": "右",
+  "message.lotmmod.dir.above": "上",
+  "message.lotmmod.dir.below": "下",
+
+  "message.lotmmod.danger_sense.gaze": "[危险感知] 你感觉到 %s 正在注视你!",
+  "message.lotmmod.danger_sense.chat": "[危险感知] 你感觉到 %s 在谈论你!"
 }

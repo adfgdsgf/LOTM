@@ -2,10 +2,13 @@ package com.lotm.lotm.common.capability;
 
 import com.lotm.lotm.api.capability.IBeyonderState;
 import com.lotm.lotm.common.config.LotMCommonConfig;
+import com.lotm.lotm.common.registry.LotMAttributes;
 import com.lotm.lotm.common.registry.LotMPathways;
 import com.lotm.lotm.content.pathway.BeyonderPathway;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.player.Player;
 
 public class BeyonderState implements IBeyonderState {
     private boolean isBeyonder = false;
@@ -19,6 +22,7 @@ public class BeyonderState implements IBeyonderState {
     // 计时器
     private int regenTimer = 0;
     private int combatTimer = 0; // 战斗状态剩余 ticks (0 表示脱战)
+    private int attributeUpdateTimer = 0; // 属性更新计时器 (新增)
 
     @Override
     public boolean isBeyonder() { return isBeyonder; }
@@ -92,7 +96,7 @@ public class BeyonderState implements IBeyonderState {
     // --- 心跳逻辑 ---
 
     @Override
-    public void tick() {
+    public void tick(Player player) {
         if (!isBeyonder) return;
 
         recalculateStatsIfNeeded();
@@ -107,6 +111,44 @@ public class BeyonderState implements IBeyonderState {
             regenTimer = 0;
             if (currentSpirituality < cachedMaxSpirituality) {
                 performRegeneration();
+            }
+        }
+
+        // 3. 动态更新感知属性 (每秒执行一次)
+        // 避免每 Tick 更新 Attribute 导致不必要的性能开销
+        if (++attributeUpdateTimer >= 20) {
+            attributeUpdateTimer = 0;
+            updatePerceptionAttributes(player);
+        }
+    }
+
+    /**
+     * 根据当前途径和序列，更新 Attribute Base Value
+     */
+    private void updatePerceptionAttributes(Player player) {
+        // 仅在服务端执行属性更新，Attribute 会自动同步到客户端
+        if (player.level().isClientSide) return;
+
+        BeyonderPathway pathway = LotMPathways.get(pathwayId);
+        if (pathway == null) return;
+
+        AttributeInstance detectionAttr = player.getAttribute(LotMAttributes.SPIRITUAL_DETECTION.get());
+        AttributeInstance concealmentAttr = player.getAttribute(LotMAttributes.SPIRITUAL_CONCEALMENT.get());
+
+        // 使用 Pathway 中定义的数据进行计算
+        // 这样数值逻辑就完全由 Pathway 类控制，此处无需硬编码倍率
+        if (detectionAttr != null) {
+            double newVal = pathway.getTotalDetection(sequence);
+            // 只有当值改变时才调用 setBaseValue，减少不必要的属性同步包
+            if (Math.abs(detectionAttr.getBaseValue() - newVal) > 0.01) {
+                detectionAttr.setBaseValue(newVal);
+            }
+        }
+
+        if (concealmentAttr != null) {
+            double newVal = pathway.getTotalConcealment(sequence);
+            if (Math.abs(concealmentAttr.getBaseValue() - newVal) > 0.01) {
+                concealmentAttr.setBaseValue(newVal);
             }
         }
     }

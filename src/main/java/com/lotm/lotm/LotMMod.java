@@ -3,10 +3,8 @@ package com.lotm.lotm;
 import com.lotm.lotm.client.config.LotMClientConfig;
 import com.lotm.lotm.common.config.LotMCommonConfig;
 import com.lotm.lotm.common.network.PacketHandler;
-// import com.lotm.lotm.common.registry.LotMEffects; // 移除导入
 import com.lotm.lotm.common.registry.LotMRegistries;
 import com.mojang.logging.LogUtils;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -32,12 +30,7 @@ public class LotMMod {
         // ==========================================
         // 2. 注册注册表 (Registries)
         // ==========================================
-
-        // 统一通过 LotMRegistries 管理所有注册表
         LotMRegistries.register(modEventBus);
-
-        // 已移除：LotMEffects.register(modEventBus);
-        // 理由：已移动至 LotMRegistries 以保持高内聚。
 
         // ==========================================
         // 3. 生命周期
@@ -47,10 +40,13 @@ public class LotMMod {
         // ==========================================
         // 4. 注册 Forge 事件
         // ==========================================
-        MinecraftForge.EVENT_BUS.register(this);
+        // 修正：移除无效的注册。
+        // 本类中没有 @SubscribeEvent 实例方法，CommonForgeEvents 等类已通过 @Mod.EventBusSubscriber 自动注册。
+        // MinecraftForge.EVENT_BUS.register(this);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
+        // 网络包注册必须在主线程安全执行
         event.enqueueWork(PacketHandler::register);
     }
 }

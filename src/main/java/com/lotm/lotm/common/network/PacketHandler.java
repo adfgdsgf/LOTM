@@ -1,14 +1,8 @@
 package com.lotm.lotm.common.network;
 
 import com.lotm.lotm.LotMMod;
-import com.lotm.lotm.common.network.packet.c2s.C2SCastSkillPacket;
-import com.lotm.lotm.common.network.packet.c2s.C2SToggleSkillPacket;
-import com.lotm.lotm.common.network.packet.c2s.C2SUpdateSkillBarPacket;
-import com.lotm.lotm.common.network.packet.c2s.C2SSwitchPresetPacket;
-import com.lotm.lotm.common.network.packet.s2c.S2CIntuitionAlertPacket;
-import com.lotm.lotm.common.network.packet.s2c.S2CSyncAbilityDataPacket;
-import com.lotm.lotm.common.network.packet.s2c.S2CSyncBeyonderDataPacket;
-import com.lotm.lotm.common.network.packet.s2c.S2CSyncSkillBarPacket;
+import com.lotm.lotm.common.network.packet.c2s.*;
+import com.lotm.lotm.common.network.packet.s2c.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkDirection;
@@ -65,6 +59,13 @@ public class PacketHandler {
                 .consumerMainThread(C2SToggleSkillPacket::handle)
                 .add();
 
+        // 5. 占卜请求包
+        CHANNEL.messageBuilder(C2SRequestDivinationPacket.class, id++, NetworkDirection.PLAY_TO_SERVER)
+                .decoder(C2SRequestDivinationPacket::new)
+                .encoder(C2SRequestDivinationPacket::encode)
+                .consumerMainThread(C2SRequestDivinationPacket::handle)
+                .add();
+
         // ==================== 服务端 -> 客户端 (S2C) ====================
 
         // 5. 同步非凡者属性 (灵性, 序列等)
@@ -93,6 +94,34 @@ public class PacketHandler {
                 .decoder(S2CIntuitionAlertPacket::new)
                 .encoder(S2CIntuitionAlertPacket::encode)
                 .consumerMainThread(S2CIntuitionAlertPacket::handle)
+                .add();
+
+        // 9. 幻觉数据包
+        CHANNEL.messageBuilder(S2CHallucinationPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(S2CHallucinationPacket::new)
+                .encoder(S2CHallucinationPacket::encode)
+                .consumerMainThread(S2CHallucinationPacket::handle)
+                .add();
+
+        // 10. 占卜数据同步
+        CHANNEL.messageBuilder(S2CSyncDivinationDataPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(S2CSyncDivinationDataPacket::new)
+                .encoder(S2CSyncDivinationDataPacket::encode)
+                .consumerMainThread(S2CSyncDivinationDataPacket::handle)
+                .add();
+
+        // 11. 占卜结果包
+        CHANNEL.messageBuilder(S2CDivinationResultPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(S2CDivinationResultPacket::new)
+                .encoder(S2CDivinationResultPacket::encode)
+                .consumerMainThread(S2CDivinationResultPacket::handle)
+                .add();
+
+        // 12. 高亮设置包
+        CHANNEL.messageBuilder(S2CSetDivinationHighlightPacket.class, id++, NetworkDirection.PLAY_TO_CLIENT)
+                .decoder(S2CSetDivinationHighlightPacket::new)
+                .encoder(S2CSetDivinationHighlightPacket::encode)
+                .consumerMainThread(S2CSetDivinationHighlightPacket::handle)
                 .add();
     }
 

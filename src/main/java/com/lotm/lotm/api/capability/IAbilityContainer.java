@@ -16,6 +16,15 @@ public interface IAbilityContainer {
     // --- 技能学习 ---
     void learnAbility(ResourceLocation abilityId);
     void forgetAbility(ResourceLocation abilityId);
+
+    /**
+     * ★★★ 核心新增：清空所有能力 ★★★
+     * <p>
+     * 用于途径切换、洗点或完全重置。
+     * 必须清除已学技能、冷却、激活状态、预设栏等所有数据。
+     */
+    void clearAbilities();
+
     boolean hasAbility(ResourceLocation abilityId);
     List<ResourceLocation> getLearnedAbilities();
 

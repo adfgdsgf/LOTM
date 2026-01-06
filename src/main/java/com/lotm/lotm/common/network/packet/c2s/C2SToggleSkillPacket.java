@@ -44,8 +44,13 @@ public record C2SToggleSkillPacket(ResourceLocation skillId) {
 
                 // 1. 安全性检查：
                 // 确保技能存在，且属于“可切换/维持”的类型 (TOGGLE, SUMMON_MAINTAIN, PASSIVE)
-                // 注意：需要确保 SkillCastType.PASSIVE 在 isToggleOrMaintain() 中返回 true
                 if (skill == null || !skill.getCastType().isToggleOrMaintain()) return;
+
+                // ★★★ 安全检查：如果试图关闭，必须检查 canBeDeactivated ★★★
+                // 如果技能当前是激活状态，且不允许被关闭，则直接忽略请求
+                if (abilities.isSkillActive(skill.getId()) && !skill.canBeDeactivated(player)) {
+                    return; // 拒绝请求
+                }
 
                 // 2. 逻辑分流
                 if (skill.getCastType().isPassive()) {

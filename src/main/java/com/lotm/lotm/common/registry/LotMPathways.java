@@ -3,6 +3,7 @@ package com.lotm.lotm.common.registry;
 import com.lotm.lotm.LotMMod;
 import com.lotm.lotm.content.pathway.BeyonderPathway;
 import com.lotm.lotm.content.pathway.impl.seer.SeerPathway;
+import com.lotm.lotm.content.pathway.impl.monster.MonsterPathway;
 import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
@@ -22,9 +23,11 @@ public class LotMPathways {
 
     // 预定义途径实例
     public static final SeerPathway SEER = new SeerPathway();
+    public static final MonsterPathway MONSTER = new MonsterPathway();
 
     public static void register() {
         registerPathway(SEER);
+        registerPathway(MONSTER);
         // 未来在此处注册更多途径，如 SPECTATOR...
         LotMMod.LOGGER.info("Registered {} beyonder pathways.", PATHWAYS.size());
     }
